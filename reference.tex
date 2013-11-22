@@ -1,0 +1,540 @@
+\documentclass[hyperref={pdfpagelabels=false}]{beamer}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{diagbox}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\mode<presentation> { \usetheme{Montpellier} }
+\newcommand{\meet}{\wedge}
+\newcommand{\compose}{\circ}
+
+\title{Solving Size Constraints \\Using Graph Representation}
+
+\author{Felix Reihl}
+\date{09.08.2013}
+
+%\beamerdefaultoverlayspecification{<+->}
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame} 
+
+\begin{frame}
+	\tableofcontents
+\end{frame} 
+
+\section{Einführung}
+%\begin{frame}
+%	\frametitle{Motivation}
+%\end{frame}
+% ---
+\subsection{Definition des Problems}
+\begin{frame}
+	\begin{block}{Grammatik}
+		\small
+		\[
+			\begin{array}{lrl@{\qquad}l}
+				i,j,k &&& \mbox{rigide Variablen} \\
+				n     & ::=  & 0 \mid 1 \mid \dots & \mbox{feste natürliche Zahl}
+				\\
+				v,w   & ::=  & n      & \mbox{Größenwert (size value)} \\
+									& \mid & i + n  & \mbox{rigide Variable + Offset}  \\
+								 & \mid & \infty & \mbox{unendliche Größe}  \\
+								& \mid & \max(\vec v) & \mbox{Maximum von $v_1$, \dots, $v_n$} \\ 
+				H     & ::= & i < v \mid i \leq v & \mbox{Hypothese} \\
+				\Gamma& ::= & \vec H & \mbox{Kontext (Liste von Hypothesen)} \\
+			\end{array}
+		\]
+	\end{block}
+\end{frame}
+% ---
+\begin{frame}
+	\begin{block}{Grammatik (Forts.)}
+		\small
+		\[
+			\begin{array}{lrl@{\qquad}l}
+				X,Y,Z &&& \mbox{flexible Variablen (zu lösen)} \\
+				a,b,c & ::=  & v             &  \mbox{Größenausdruck (size expression)} \\
+									& \mid & \max(\vec a) & \mbox{Maximum von $a_1$, \dots, $a_n$} \\ 
+								 & \mid & X(\vec a) + n & \mbox{ungelöste Funktion (angewendet} \\
+								 &&& \mbox{auf Argumente) + Offset} \\
+				C     & ::= & a < b \mid a \leq b & \mbox{Constraint Ungleichung} \\
+			\end{array}
+		\]
+	\end{block}
+\end{frame}
+% ---
+\begin{frame}[fragile]
+	\frametitle{Beispiel}
+	\tiny
+	\begin{verbatim}
+  data List +(i : Size) ++(A : Set)
+  { nil
+  ; cons [j < i] (x : A) (xs : List j A) : List i A
+  }
+
+  data Bool { true ; false }
+  
+  fun T   : Set {}
+  fun leq : T -> T -> Bool
+  
+  fun insert : [i : Size] |i| -> T -> List i T -> List (i + 1) T
+                        {- termination order -}
+  { insert i x nil            = cons _ x nil
+                                  {- X1 -}
+  ; insert i x (cons i' y ys) = case leq x y
+    { true  -> cons _ x (cons _ y ys)
+                 {- X2 -}  {- X3 -}
+    ; false -> cons _ y (insert _ x ys)
+                 {- X4 -}    {- X5 -}
+    }
+  }
+	\end{verbatim}
+	\begin{minipage}{30em}
+		\begin{block}{Constraints}
+			\tiny
+			\begin{minipage}{14em}
+				\begin{itemize}
+					\item $X_1 < i + 1$
+					\item $X_2 < i + 1$ und $i' \leq X_3$
+					\item $X_3 < X_2$
+				\end{itemize}
+			\end{minipage}
+			\begin{minipage}{14em}
+				\begin{itemize}
+					\item $X_4 < i + 1$
+					\item $i' \leq X5$
+					\item $X_5 < i$
+				\end{itemize}
+			\end{minipage}
+			%		\begin{tabular}{ll}
+			%			$X_1 < i + 1$ & $X_2 < i + 1$ und $i' \leq X_3$ \\
+			%			$X_3 < X_2$ & $X_4 < i + 1$ \\
+			%			$i' \leq X5$ & $X_5 < i$
+			%		\end{tabular}
+		\end{block}
+	\end{minipage}
+	\begin{minipage}{10em}
+		\begin{block}{Hypothesen}
+			\tiny
+			\begin{itemize}
+				\item $i' < i$
+			\end{itemize}
+		\end{block}
+	\end{minipage}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Resultierender Graph}
+	\begin{center}
+		\begin{tikzpicture}[->,scale=2,inner sep=0.2em]
+			\node (x1)  at (0,1) {$X_1$};
+			\node (x2) at (0,0) {$X_2$};
+			\node (x3) at (1,0) {$X_3$};
+			\node (x4) at (1,1) {$X_4$};
+			\node (x5) at (2,0) {$X_5$};
+			\node (i) at (-1,1) {$i$};
+			\node (i') at (-1,0) {$i'$};
+			\path
+			(x1) edge node {} (i)
+			(x2) edge node {} (i)
+			(x4) edge[bend right=30] node {} (i)
+			(x5) edge node[above] {$-1$} (i)
+			(x3) edge node[above] {$-1$} (x2)
+			(x5) edge node[above right] {$-1$} (x4)
+			(i') edge node[right] {$-1$} (i)
+			(i') edge[bend right] node {} (x3)
+			(i') edge[bend right=40] node {} (x5)
+			;
+		\end{tikzpicture}
+	\end{center}
+\end{frame}
+% ---
+\section{Vereinfachter Ansatz}
+% ---
+\begin{frame}
+	\begin{block}{Vorerst}
+		\begin{itemize}
+			\item keine Maxima
+			\item alle flexiblen Variablen hängen von den gleichen Signaturen ab: $X\ i\ j\ k,\ Y\ i\ j\ k$
+		\end{itemize}
+	\end{block}
+	\begin{block}{Vorgehen}
+		\begin{enumerate}
+			\item Vereinfachung der Constraints (\ref{simp})
+			\item Modellierung als Graph (\ref{mod})
+			\item Transitive Hülle durch Komposition (\ref{trans})
+			\item Finden von Widersprüchen innerhalb der Constraints und mit den Hypothesen (\ref{cont})
+			\item Algebraische Struktur (\ref{alg})
+			\item Finden der Lösung im Graphen (\ref{sol})
+			\item Erweitern des Problems (\ref{ext})
+		\end{enumerate}
+	\end{block}
+\end{frame}
+% ---
+\subsection{Vereinfachung der Constraints}
+\label{simp}
+\begin{frame}
+	\begin{block}{Vereinfachte Formen}
+		\begin{align}
+			\label{case00} X &< \infty \\
+			\label{case03} n &\leq X \\
+			\label{case04} X &\leq n \\
+			\label{case01} X + n &\leq i \\
+			\label{case02} X &\leq i + n \\
+			\label{case05} i + n &\leq X \\
+			\label{case06} i &\leq X + n \\
+			\label{case07} Y + n &\leq X \\
+			\label{case08} Y &\leq X + n \\
+			\label{case09} Y + n &< X \\
+			\label{case10} Y &< X + n
+		\end{align}
+	\end{block}
+\end{frame}
+% ---
+\subsection{Modellierung als Graph}
+\label{mod}
+\begin{frame}
+	\frametitle{Formen von Kanten}
+	Jede Ungleichung wird zu einer Kante im Graphen
+	\begin{center}
+		\begin{tabular}{lll}
+			Fall & Constraint & Kante \\
+			\hline
+			\ref{case00} & $X < \infty$   &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$\infty$};
+				\node (label1) at (0.5,-0.15) {\tiny$0$};
+				\node (label2) at (0.5,0.15) {\tiny$<$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case03} & $n \leq X$     &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$0$};
+				\node (b) at (1,0) {$X$};
+				\node (label1) at (0.5,-0.15) {\tiny$-n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case04} & $X \leq n$     &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$0$};
+				\node (b) at (1,0) {$X$};
+				\node (label1) at (0.5,-0.15) {\tiny$+n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case01} & $X + n \leq i$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$i$};
+				\node (label1) at (0.5,-0.15) {\tiny$-n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case02} & $X \leq i + n$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$i$};
+				\node (label1) at (0.5,-0.15) {\tiny$+n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+		\end{tabular}
+	\end{center}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Formen von Kanten (Forts.)}
+	\begin{center}
+		\begin{tabular}{lll}
+			Fall & Constraint & Kante \\
+			\hline
+			\ref{case05} & $i + n \leq X$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$i$};
+				\node (b) at (1,0) {$X$};
+				\node (label1) at (0.5,-0.15) {\tiny$-n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case06} & $i \leq X + n$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$i$};
+				\node (b) at (1,0) {$X$};
+				\node (label1) at (0.5,-0.15) {\tiny$+n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case07} & $Y + n \leq X$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$Y$};
+				\node (label1) at (0.5,-0.15) {\tiny$-n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case08} & $Y \leq X + n$ &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$Y$};
+				\node (label1) at (0.5,-0.15) {\tiny$+n$};
+				\node (label2) at (0.5,0.15) {\tiny$\leq$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case09} & $Y + n < X$    &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$Y$};
+				\node (label1) at (0.5,-0.15) {\tiny$-n$};
+				\node (label2) at (0.5,0.15) {\tiny$<$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+			\\
+			\ref{case10} & $Y < X + n$    &
+			\begin{tikzpicture}[->,baseline=-0.25em]
+				\node (a) at (0,0) {$X$};
+				\node (b) at (1,0) {$Y$};
+				\node (label1) at (0.5,-0.15) {\tiny$+n$};
+				\node (label2) at (0.5,0.15) {\tiny$<$};
+				\draw (a) to (b);
+			\end{tikzpicture}
+		\end{tabular}
+	\end{center}
+\end{frame}
+% ---
+\subsection{Komposition und Transitive Hülle}
+\label{trans}
+\begin{frame}
+	\begin{itemize}
+		\item Transitive Hülle enthält Informationen, die aus den Constraints gefolgert werden können.
+		\item Floyd-Warshall benötigt Definition von $\min$ und $+$ von Kanten
+		\item Komposition:
+			\begin{center}
+				\begin{tikzpicture}[->,baseline=-0.25em]
+					\node (a) at (0,0) {$a$};
+					\node (b) at (1,1) {$b$};
+					\node (c) at (2,0) {$c$};
+					\node (label1) at (1,-0.15) {\tiny$\alpha+\beta$};
+					\node (label2) at (1,0.15) {\tiny$\leq$};
+					\node (label3) at (0.6,0.4) {\tiny$\alpha$};
+					\node (label4) at (0.38,0.62) {\tiny$\leq$};
+					\node (label5) at (1.38,0.4) {\tiny$\beta$};
+					\node (label6) at (1.6,0.62) {\tiny$\leq$};
+					\draw (a) to (b);
+					\draw (b) to (c);
+					\draw[dashed] (a) to (c);
+				\end{tikzpicture}
+			\end{center}
+		\item Minimum:
+			\begin{center}
+				\begin{tikzpicture}[scale=2,->,baseline=-0.25em]
+					\node (a) at (0,0) {$a$}; => mininum (meet)
+					\node (b) at (1,0) {$b$};
+					\node (label1) at (0.5,0.1) {\tiny$\alpha$};
+					\node (label2) at (0.5,0.25) {\tiny$\leq$};
+					\node (label3) at (0.5,-0.25) {\tiny$\beta$};
+					\node (label4) at (0.5,-0.1) {\tiny$\leq$};
+					\draw[bend left] (a) to (b);
+					\draw[bend right] (a) to (b);
+				\end{tikzpicture}
+				wird zu
+				\begin{tikzpicture}[scale=2,->,baseline=-0.25em]
+					\node (a) at (0,0) {$a$};
+					\node (b) at (1,0) {$b$};
+					\node (label1) at (0.5,-0.12) {\tiny$\min(\alpha,\beta)$};
+					\node (label2) at (0.5,0.12) {\tiny$\leq$};
+					\draw (a) to (b);
+				\end{tikzpicture}
+			\end{center}
+		\item Offset beachten
+		\item Reflexive Hülle bilden
+	\end{itemize}
+\end{frame}
+% ---
+\subsection{Widersprüche}
+\label{cont}
+\begin{frame}
+	\begin{itemize}
+		\item Vergleich mit Hypothesengraph
+			\begin{itemize}
+				\item Problem, wenn Constraint stärker als entsprechende Hypothese
+			\end{itemize}
+		\item Negative Zyklen im Constraintgraph
+	\end{itemize}
+\end{frame}
+% ---
+\subsection{Algebraische Struktur}
+\label{alg}
+\begin{frame}
+	\begin{itemize}
+		\item
+			\begin{block}{$(L,\wedge)$ Beschränkter Halbverband}
+				\begin{itemize}
+					\item Assoziativität
+					\item Kommutativität
+					\item Idempotenz
+					\item Neutrales Element
+				\end{itemize}
+			\end{block}
+		\item
+			\begin{block}{$(L,\wedge,\compose)$ Dioid (Halbring mit idempotentem $\meet$)}
+				\begin{itemize}
+					\item $(L,\wedge)$ kommutativer Monoid mit neutralem Element
+					\item $(L,\compose)$ Monoid mit neutralem Element
+					\item Distributivität von $\meet$ und $\compose$
+					\item Komponieren ($\compose$) mit $\top$ ergibt $\top$
+				\end{itemize}
+			\end{block}
+	\end{itemize}
+\end{frame}
+% ---
+\section{Finden der Lösung}
+\label{sol}
+% ---
+\subsection{Kleinste obere Schranke und größte untere Schranke}
+\begin{frame}
+	\begin{itemize}
+		\item Kleinste obere Schranke ist festgelegt durch \emph{schärfste} ausgehende Kante
+		\item Größte untere Schranke ist festgelegt durch \emph{schärfste} eingehende Kante
+		\item Eingehende (bzw.\ ausgehende) Kanten anordnen, wenn möglich
+	\end{itemize}
+\end{frame}
+% ---
+\subsection{Zusammenhangskomponenten}
+\begin{frame}
+	\begin{itemize}
+		\item Zusammenhangskomponenten getrennt betrachten beim Finden der Lösung
+		\item Beim Bilden der Zusammenhangskomponenten $0$, $\infty$ und rigide Variablen weglassen
+	\end{itemize}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Lösen}
+	\begin{itemize}
+		\item Wenn größte Lösung für $X$ gesucht, dann $X$ auf kleinste obere Schranke setzen
+		\item Wenn kleinste Lösung für $X$ gesucht, dann $X$ auf größte untere Schranke setzen
+	\end{itemize}
+\end{frame}
+% ---
+\section{Erweitertes Problem}
+\label{ext}
+% ---
+\subsection{Maxima}
+\begin{frame}
+	\begin{itemize}
+		\item Zuerst vereinfachen
+		\item Constraints der Form
+			\[ \max(m,i_1+o_1,\dotsc,i_s+o_s) \leq i + n \]
+			in einzelne Ungleichungen aufteilen
+		\item Problem bei Constraints der Form
+			\[ i + n \leq \max(m,i_1+o_1,\dotsc,i_s+o_s) \]
+			da $i+n \leq$ als mindestens eines der der Argumente des Maximums sein muss % kann nicht einfach in Graphen abgebildet werden
+		\item Solche Ungleichungen erstmal ignorieren und später auf Konsistenz überprüfen % existiert mindestens eine entsprechende Kante, die schärfer ist?
+	\end{itemize}
+\end{frame}
+% ---
+\subsection{Variablensignaturen}
+\begin{frame}
+	\begin{itemize}
+		\item Zuerst: Alle flexiblen Variablen hängen von der gleichen Signatur von rigiden Variablen ab
+		\item Jetzt erlauben wir auch $X\ i\ j\ k \leq Y\ i\ k\ j$
+		\item Kanten zwischen solchen Knoten brauchen neues Merkmal
+		\item Permutationsfunktion $\pi_{(\nu_1,\dotsc,\nu_n)}$, z.B.
+			\[ \pi_{(1,3,2)}(i,j,k) = (i,k,j) \]
+		\item Komposition kein Problem, aber
+		\item Vergleich im Normalfall nicht möglich: Welche Kante ist schärfer?
+			\begin{center}
+				\begin{tikzpicture}[->,baseline=-0.25em]
+					\node (x) at (0,0) {$X$};
+					\node (y) at (3,0) {$Y$};
+					\node (label1) at (1.5,-0.68) {\tiny$0$ $\leq$};
+					\node (label2) at (1.5,0.68) {\tiny$0$ $\leq$};
+					\node (label3) at (1.5,-0.35) {\tiny$\pi_{(1,2,3)}$};
+					\node (label4) at (1.5,0.35) {\tiny$\pi_{(1,3,2)}$};
+					\draw[bend right] (x) to (y);
+					\draw[bend left] (x) to (y);
+				\end{tikzpicture}
+			\end{center}
+	\end{itemize}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Beispiel}
+	Constraints:
+	\begin{align*}
+		X i j &\leq Y j i \\
+		X i j &\leq Y i j \\
+		i &\leq X i j \\
+		i &\leq Y i j
+	\end{align*}
+	und $\mathsf{pol}(X) = \mathsf{pol}(Y) = -$
+
+	Hypothese:
+	\[ i \leq j \]
+\end{frame}
+% ---
+\begin{frame}
+	Die transitive Hülle schaut folgendermaßen aus:
+	\begin{center}
+		\begin{tikzpicture}[->,scale=1.5,inner sep=0.15em]
+			\node (0)  at (-1,-1) {$0$};
+			\node (x) at (1,1) {$X$};
+			\node (y) at (2,-1) {$Y$};
+			\node (i) at (4,1) {$i$};
+			\node (j) at (5,-1) {$j$};
+			\node (oo) at (6,0) {$\infty$};
+			\path
+			(0) edge node {} (x)
+			(0) edge node {} (y)
+			(x) edge[bend left=20] node[xshift=-0.15cm, yshift=0.1cm, above right] {$(\leq,0,\pi_{(2,1)})$} (y)
+			(x) edge[bend right=20] node[xshift=0.1cm, yshift=-0.35cm, left] {$(\leq,0,\pi_{(1,2)})$} (y)
+			(i) edge node {} (x)
+			(i) edge node {} (j)
+			(i) edge node {} (y)
+			(j) edge node {} (y)
+			(x) edge[bend left=40] node {} (oo)
+			(y) edge node {} (oo)
+			;
+		\end{tikzpicture}
+	\end{center}
+\end{frame}
+% ---
+\begin{frame}
+	\begin{itemize}
+		\item Größte untere Schranke für $Y$ ist $j$, kleinste untere Schranke ist $\infty$
+		\item Lösung für $Y$: $j$
+		\item Größte untere Schranke für $X$ ist $0$, kleinste untere Schranke ist $Y\ j\ i = i$ oder $Y\ i\ j = j$
+		\item Lösung für $X$: $i$ und $j$
+	\end{itemize}
+\end{frame}
+% ---
+\section{Ende}
+\begin{frame}
+	\frametitle{Zusammenfassung}
+	\begin{itemize}
+		\item Lösen ist i.A. möglich, wenn keine Widersprüche auftreten
+		\item Widersprüche werden erkannt
+		\item Komplexität $\mathcal{O}(m n^3)$ bzw. $\mathcal{O}(m n^3 \log(n))$
+	\end{itemize}
+\end{frame}
+% ---
+\begin{frame}
+	\begin{center}
+		Vielen Dank für Ihre Aufmerksamkeit!
+	\end{center}
+\end{frame}
+% ---
+\end{document}
