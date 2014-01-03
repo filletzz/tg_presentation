@@ -1,6 +1,17 @@
 \documentclass[hyperref={pdfpagelabels=false}]{beamer}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+\newtheorem*{exc}{Example}
+\newtheorem{lem}{Lemma}
+\newtheorem*{rem}{Remark}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollar}
+\newtheorem{ntn}{Notation}
+\newtheorem{rep}{Repetition}
+
 \mode<presentation> { \usetheme{Montpellier} }
 
 \title{On the metric dimension, the upper dimension\\ and the resolving number of graphs}
@@ -32,6 +43,34 @@
 \subsection{The metric dimension and the upper dimension}
 % Felix
 \begin{frame}
+	\frametitle{Definitions}
+	\begin{dfn}[Grid graph]
+		Let $G_l$ be the quadratic grid graph with $l$ vertices in both directions. The \emph{coordinates} $(x_1,x_2)$ of a vertex $x$ start with $(0,0)$ at the bottom left corner.
+	\end{dfn}
+	\begin{dfn}[Quadrants and Diagonals]
+		The \emph{quadrants} of a vertex $x$ in a grid graph are $Q_1$ (the top right sector of $x$), $Q_2$ (top left), $Q_3$ (bottom left) and $Q_4$ (bottom right).
+
+		The \emph{diagonals} of a grid graph are $D_i = \{ (x_1,x_2) \mid x_1 + x_2 = i \}$. A pair $\{x,y\}$ is a \emph{diagonal pair} if a diagonal exists that contains both.
+	\end{dfn}
+\end{frame}
+% ---
+\begin{frame}
+	$R(x,y)$ is the set of vertices that resolve $x$ and $y$.
+	\begin{lem}
+		Let $\{x,y\}$ be a diagonal pair with $d(x,y) = 2$. Then
+		\[ R(x,y) = Q_2(x) \cup Q_4(y) \]
+	\end{lem}
+	\begin{dfn}[S-uniqueness]
+		For a resolving set $S$, a pair $\{x,y\}$ is \emph{S-unique} if there is a unique vertex $x \in S$ resolving $x$ and $y$. $u$ and $\{x,y\}$ are \emph{associated to each other}.
+	\end{dfn}
+\end{frame}
+% ---
+\begin{frame}
+	\begin{lem}
+		Let $S$ be a resolving set and let $\{x,y\} = \{(x_1,x_2),(y_1,y_2)\}$ be a S-unique diagonal pair with associated vertex $u$ such that $d(x,y)>2$.
+
+		Then, there exist excactly $y_1 - x_1$ S-unique diagonal pairs with associated vertex $u$ and distance $2$.
+	\end{lem}
 \end{frame}
 % ----
 \subsection{The resolving number}
