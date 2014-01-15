@@ -2,15 +2,19 @@
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amsthm, amsfonts, amssymb}
+\usepackage{tikz}
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
 \newtheorem*{exc}{Example}
-\newtheorem{lem}{Lemma}
-\newtheorem*{rem}{Remark}
-\newtheorem{thm}{Theorem}
-\newtheorem{cor}{Corollar}
 \newtheorem{ntn}{Notation}
 \newtheorem{rep}{Repetition}
+\newtheorem{obs}{Observation}
+\newtheorem*{rem}{Remark}
+\theoremstyle{theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollar}
+\newtheorem{clm}{Claim}
 
 \mode<presentation> { \usetheme{Montpellier} }
 
@@ -30,13 +34,13 @@
 % ----
 \section{Introduction}
 % Petr
-\begin{frame}
-\end{frame}
+%\begin{frame}
+%\end{frame}
 % ----
 \section{Randomly k-dimensional graphs}
 % Fátima
-\begin{frame}
-\end{frame}
+%\begin{frame}
+%\end{frame}
 % ----
 \section{Realization}
 % ----
@@ -45,7 +49,7 @@
 \begin{frame}
 	\frametitle{Definitions}
 	\begin{dfn}[Grid graph]
-		Let $G_l$ be the quadratic grid graph with $l$ vertices in both directions. The \emph{coordinates} $(x_1,x_2)$ of a vertex $x$ start with $(0,0)$ at the bottom left corner.
+		Let $G_\ell$ be the quadratic grid graph with $\ell$ vertices in both directions. The \emph{coordinates} $(x_1,x_2)$ of a vertex $x$ start with $(0,0)$ at the bottom left corner.
 	\end{dfn}
 	\begin{dfn}[Quadrants and Diagonals]
 		The \emph{quadrants} of a vertex $x$ in a grid graph are $Q_1$ (the top right sector of $x$), $Q_2$ (top left), $Q_3$ (bottom left) and $Q_4$ (bottom right).
@@ -60,9 +64,15 @@
 		Let $\{x,y\}$ be a diagonal pair with $d(x,y) = 2$. Then
 		\[ R(x,y) = Q_2(x) \cup Q_4(y) \]
 	\end{lem}
+\end{frame}
+% ---
+\begin{frame}
 	\begin{dfn}[S-uniqueness]
 		For a resolving set $S$, a pair $\{x,y\}$ is \emph{S-unique} if there is a unique vertex $x \in S$ resolving $x$ and $y$. $u$ and $\{x,y\}$ are \emph{associated to each other}.
 	\end{dfn}
+	\begin{obs}
+		If $\{x,y\}$ is S-unique with associated vertex $u$ and $\{r,s\}$ has $R(r,s) \subseteq R(x,y)$, then $\{r,s\}$ is also S-unique with associated vertex $u$.
+	\end{obs}
 \end{frame}
 % ---
 \begin{frame}
@@ -71,6 +81,33 @@
 
 		Then, there exist excactly $y_1 - x_1$ S-unique diagonal pairs with associated vertex $u$ and distance $2$.
 	\end{lem}
+%	\begin{center}
+%		\begin{tikzpicture}[scale=0.4]
+%			\tikzset{dot/.style={circle,fill=black,inner sep=0,minimum size=0.2em}}
+%			% horizontal
+%			\draw (0,0) to (8,0);
+%			\draw (0,1) to (8,1);
+%			\draw (0,2) to (8,2);
+%			\draw (0,3) to (8,3);
+%			\draw (0,4) to (8,4);
+%			\draw (0,5) to (8,5);
+%			\draw (0,6) to (8,6);
+%			\draw (0,7) to (8,7);
+%			\draw (0,8) to (8,8);
+%			% vertical
+%			\draw (0,0) to (0,8);
+%			\draw (1,0) to (1,8);
+%			\draw (2,0) to (2,8);
+%			\draw (3,0) to (3,8);
+%			\draw (4,0) to (4,8);
+%			\draw (5,0) to (5,8);
+%			\draw (6,0) to (6,8);
+%			\draw (7,0) to (7,8);
+%			\draw (8,0) to (8,8);
+%			% nodes
+%			\node [dot, label=above right:\tiny y] (y) at (6,3) {};
+%		\end{tikzpicture}
+%	\end{center}
 \end{frame}
 % ---
 \begin{frame}
@@ -78,10 +115,36 @@
 		Let $S$ be a resolving set and let $\{x,y\}$ be a S-unique diagonal pair with associated vertex $u$ such that $d(x,y)=2$. If there exist two S-unique diagonal pairs in the same row (column) as $\{x,y\}$ with associated vertices $v$ and $w$, and $u \neq v$, then $v = w$.
 	\end{lem}
 \end{frame}
+% ---
+\begin{frame}
+	\begin{thm}
+		For every pair $a,b$ of integers with $2 \leq a \leq b$, there exists a connected graph $G$ with $\dim(G) = a$ and $\dim^+(G) = b$.
+	\end{thm}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Claim A}
+	\begin{ntn}
+		Let $H_\ell$ be the grid graph $G_\ell$, with a triangle attached at $(0,0)$.
+	\end{ntn}
+	\begin{clm}
+		$\dim(H_\ell) = 2$ and $\dim^+(H_\ell) = 2\ell - 2$.
+	\end{clm}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Claim B}
+	\begin{ntn}
+		Let $H_{\ell,m}$ be the grid graph $G_\ell$ ($\ell \geq 3$), with a set of $m \geq 2$ pendant vertices attached at $(0,0)$.
+	\end{ntn}
+	\begin{clm}
+		$\dim(H_{\ell,m}) = m + 1$ and $\dim^+(H_{\ell,m}) = m + 2\ell - 4$.
+	\end{clm}
+\end{frame}
 % ----
 \subsection{The resolving number}
 %Petr
-\begin{frame}
-\end{frame}
+%\begin{frame}
+%\end{frame}
 % ----
 \end{document}
