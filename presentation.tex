@@ -3,6 +3,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amsthm, amsfonts, amssymb}
 \usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtools}
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
 \newtheorem*{exc}{Example}
@@ -125,17 +127,48 @@
 \begin{frame}
 	\frametitle{Claim A}
 	\begin{ntn}
-		Let $H_\ell$ be the grid graph $G_\ell$, with a triangle attached at $(0,0)$.
+		Let $H_\ell$ be the grid graph $G_\ell$, with a triangle attached at $(0,0)$. The vertices of the triangle are called $\alpha, \beta$.
 	\end{ntn}
 	\begin{clm}
 		$\dim(H_\ell) = 2$ and $\dim^+(H_\ell) = 2\ell - 2$.
 	\end{clm}
+	\begin{block}{Steps of the proof}
+		\begin{enumerate}
+			\item $\dim(H_\ell) = 2$
+			\item $\dim^+(H_\ell) \geq 2\ell - 2$
+			\item $\dim^+(H_\ell) \leq 2\ell - 2$
+		\end{enumerate}
+	\end{block}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Step 3}
+	\begin{itemize}
+		\item $S$ is minimal, therefore every $u \in S$ has an associated S-unique pair $p(u)$.
+		%\item $\{\beta, (0,0)\}$ is not a S-unique pair (every vertex of $G_\ell$ resolves it).
+		\item $\alpha$ resolves every non-diagonal pair.
+		\item Therefore, every $u \in S \setminus \{\alpha\}$ has an associated S-unique diagonal pair $p(u)$.
+		\item Lemma 3: These pairs are at distance 2 to each other.
+		\item Lemma 4: For all pairs in the same row (or column), at most \emph{two} distinct vertices are associated to them.
+		\item Lemma 1: In the first row (or column) there is at most \emph{one} element of the resolving set. % S minimal
+	\end{itemize}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Step 3, cont.}
+	\begin{itemize}
+		\item Since there are $\ell - 1$ rows (and columns), there are at most this many S-unique pairs that can be associated to the vertices of $S \setminus \{\alpha\}$:
+			\[\underbrace{2}_{\substack{\text{at most vertices}\\\text{for all pairs}\\\text{in a row}}}
+			(\underbrace{\ell - 2}_{\substack{\text{rows without}\\\text{first one}}})
+		+ \underbrace{1}_{\substack{\text{at most 1}\\\text{vertex in the first}\\\text{row and column}}}\]
+		\item Therefore $|S \setminus \{\alpha\}| = |S| - 1 \leq 2(\ell - 2) + 1$.
+	\end{itemize}
 \end{frame}
 % ---
 \begin{frame}
 	\frametitle{Claim B}
 	\begin{ntn}
-		Let $H_{\ell,m}$ be the grid graph $G_\ell$ ($\ell \geq 3$), with a set of $m \geq 2$ pendant vertices attached at $(0,0)$.
+		Let $H_{\ell,m}$ be the grid graph $G_\ell$ ($\ell \geq 3$), with a set of $m \geq 2$ pendant vertices $\alpha_1, \dotsc, \alpha_m$ attached at $(0,0)$.
 	\end{ntn}
 	\begin{clm}
 		$\dim(H_{\ell,m}) = m + 1$ and $\dim^+(H_{\ell,m}) = m + 2\ell - 4$.
