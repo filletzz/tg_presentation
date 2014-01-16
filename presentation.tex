@@ -26,9 +26,9 @@
 \date{}
 
 \begin{document}
-\begin{frame}
-	\titlepage
-\end{frame} 
+%\begin{frame}
+%	\titlepage
+%\end{frame} 
 % ----
 \begin{frame}
 	\tableofcontents
@@ -61,6 +61,7 @@
 \end{frame}
 % ---
 \begin{frame}
+	\frametitle{Lemma 3.1}
 	$R(x,y)$ is the set of vertices that resolve $x$ and $y$.
 	\begin{lem}
 		Let $\{x,y\}$ be a diagonal pair with $d(x,y) = 2$. Then
@@ -69,7 +70,8 @@
 \end{frame}
 % ---
 \begin{frame}
-	\begin{dfn}[S-uniqueness]
+	\frametitle{S-uniqueness}
+	\begin{dfn}
 		For a resolving set $S$, a pair $\{x,y\}$ is \emph{S-unique} if there is a unique vertex $x \in S$ resolving $x$ and $y$. $u$ and $\{x,y\}$ are \emph{associated to each other}.
 	\end{dfn}
 	\begin{obs}
@@ -78,6 +80,7 @@
 \end{frame}
 % ---
 \begin{frame}
+	\frametitle{Lemma 3.3}
 	\begin{lem}
 		Let $S$ be a resolving set and let $\{x,y\} = \{(x_1,x_2),(y_1,y_2)\}$ be a S-unique diagonal pair with associated vertex $u$ such that $d(x,y)>2$.
 
@@ -113,12 +116,14 @@
 \end{frame}
 % ---
 \begin{frame}
+	\frametitle{Lemma 3.4}
 	\begin{lem}
 		Let $S$ be a resolving set and let $\{x,y\}$ be a S-unique diagonal pair with associated vertex $u$ such that $d(x,y)=2$. If there exist two S-unique diagonal pairs in the same row (column) as $\{x,y\}$ with associated vertices $v$ and $w$, and $u \neq v$, then $v = w$.
 	\end{lem}
 \end{frame}
 % ---
 \begin{frame}
+	\frametitle{Theorem 3.5}
 	\begin{thm}
 		For every pair $a,b$ of integers with $2 \leq a \leq b$, there exists a connected graph $G$ with $\dim(G) = a$ and $\dim^+(G) = b$.
 	\end{thm}
@@ -132,7 +137,7 @@
 	\begin{clm}
 		$\dim(H_\ell) = 2$ and $\dim^+(H_\ell) = 2\ell - 2$.
 	\end{clm}
-	\begin{block}{Steps of the proof}
+	\begin{block}{Steps of the proof of Claim A}
 		\begin{enumerate}
 			\item $\dim(H_\ell) = 2$
 			\item $\dim^+(H_\ell) \geq 2\ell - 2$
@@ -148,9 +153,9 @@
 		%\item $\{\beta, (0,0)\}$ is not a S-unique pair (every vertex of $G_\ell$ resolves it).
 		\item $\alpha$ resolves every non-diagonal pair.
 		\item Therefore, every $u \in S \setminus \{\alpha\}$ has an associated S-unique diagonal pair $p(u)$.
-		\item Lemma 3: These pairs are at distance 2 to each other.
-		\item Lemma 4: For all pairs in the same row (or column), at most \emph{two} distinct vertices are associated to them.
-		\item Lemma 1: In the first row (or column) there is at most \emph{one} element of the resolving set. % S minimal
+		\item Lemma 3.3: These pairs are at distance 2 to each other.
+		\item Lemma 3.4: For all pairs in the same row (or column), at most \emph{two} distinct vertices are associated to them.
+		\item Lemma 3.1: In the first row (or column) there is at most \emph{one} element of the resolving set. % S minimal
 	\end{itemize}
 \end{frame}
 % ---
@@ -174,7 +179,54 @@
 		$\dim(H_{\ell,m}) = m + 1$ and $\dim^+(H_{\ell,m}) = m + 2\ell - 4$.
 	\end{clm}
 \end{frame}
+% ---
+\begin{frame}
+	\frametitle{Proof of Claim B}
+	\begin{itemize}
+		\item $\dim(H_{\ell,m}) \leq m+1$ because $\{\alpha_1, \dotsc, \alpha_m, (\ell-1,0)\}$ is a resolving set.
+		\item $\dim(H_{\ell,m}) \geq m+1$ because all but one of $\{\alpha_1,\dotsc,\alpha_m\}$ have to be in $S$ plus at least two of the grid graph.
+		\item $\dim^+(H_\ell,m) = m + 2\ell - 4$, mimicking the proof for claim A.
+	\end{itemize}
+\end{frame}
 % ----
+\begin{frame}
+	\begin{itemize}
+		\item Claims A and B give a connected graph $G$ with $\dim(G) = a$ and $\dim^+(G) = b$ if 
+			\begin{itemize}
+				\item $a=2$ and $b$ even\\
+					$\rightarrow$ let $G=H_\ell$ with $\ell = (b+2)/2$
+				\item $a>2$ and $b-a$ odd\\
+					$\rightarrow$ let $G=H_{\ell,m}$ with $\ell = 2+(b-a+1)/2$ and $m=a-1$
+			\end{itemize}
+		\item For the remaining cases:
+
+			Remove the last column of $H_\ell$, $H_{\ell,m}$ and $G_\ell$ respectively. We can use the tools from before with three changes:
+			\begin{enumerate}
+				\item Take $\{(0,0),(\ell-2,0)\}$ as a metric basis of $\tilde G_\ell$
+				\item Remove $(\ell-2,\ell-2)$ from $S$.\\
+					Minimal resolving sets of size $2\ell-3$ (for $\tilde H_\ell$) and $2\ell+m-5$ (for $\tilde H_{\ell,m}$)
+				\item Use Lemma 3.4 to get\\
+					$|S \setminus \{\alpha\}| \leq 2(\ell - 2)$ (for $\tilde H_\ell$)\\
+					$|S \setminus \{\alpha_1,\dotsc,\alpha_{m-1}\}| \leq 2(\ell - 2)$ (for $\tilde H_{\ell,m}$)
+
+					Therefore $|S| \leq 2\ell - 3$ (for $\tilde H_\ell$) and $|S| \leq 2\ell + m - 5$ (for $\tilde H_{\ell,m}$)
+			\end{enumerate}
+	\end{itemize}
+\end{frame}
+% ---
+\begin{frame}
+	\frametitle{Conclusion}
+	\begin{itemize}
+		\item $\dim(\tilde H_\ell) = 2$, $\dim^+(\tilde H_\ell) = 2\ell - 3$\\
+			$\Rightarrow$ we get a graph for $a=2$ and $b$ odd\\
+			($H_\ell$ with $\ell = 2+(b-1)/2$)
+		\item $\dim(\tilde H_{\ell,m}) = m + 1$, $\dim^+(\tilde H_{\ell,m}) = m + 2\ell - 5$\\
+			$\Rightarrow$ we get a graph for $a>2$ and $b-a$ even\\
+			($H_{\ell,m}$ with $\ell = 3+(b-a)/2$ and $m=a-1$)
+		\item All remaining cases covered, therefore we found a graph $G$ for every $2 \leq a \leq b$ with $\dim(G) = a$ and $\dim^+(G) = b$.
+	\end{itemize}
+\end{frame}
+% ---
 \subsection{The resolving number}
 %Petr
 %\begin{frame}
